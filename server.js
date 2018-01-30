@@ -66,6 +66,10 @@ app.put('/v1/notes/:id', (req, res, next) => {
   });
 });
 
+app.get('/throw', (req, res, next) => {
+  throw new Error('Boom!!');
+});
+
 app.use(function (req, res, next) {
   var err = new Error('Not found');
   err.status = 404;
