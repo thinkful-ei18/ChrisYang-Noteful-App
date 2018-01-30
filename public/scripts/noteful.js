@@ -79,7 +79,12 @@ const noteful = (function () {
       api.update(noteObj.id, noteObj, updateResponse => {
         store.currentNote = updateResponse;
 
-        render();
+        api.search(store.currentSearchTerm, updateResponse => {
+          store.notes = updateResponse;
+
+          render();
+        });
+
       });
 
     });
