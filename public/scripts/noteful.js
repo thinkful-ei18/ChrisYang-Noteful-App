@@ -20,6 +20,7 @@ const noteful = (function () {
     const listItems = list.map(item => `
     <li data-id="${item.id}" class="js-note-element ${currentNote.id === item.id ? 'active' : ''}">
       <a href="#" class="name js-note-show-link">${item.title}</a>
+      <button class="removeBtn js-note-delete-button">X</button>
     </li>`);
     return listItems.join('');
   }
@@ -76,15 +77,50 @@ const noteful = (function () {
 
       noteObj.id = store.currentNote.id;
 
-      api.update(noteObj.id, noteObj, updateResponse => {
-        store.currentNote = updateResponse;
+      if (noteObj.id) {
+        api.update(noteObj.id, noteObj, updateResponse => {
+          store.currentNote = updateResponse;
+
+          api.search(store.currentSearchTerm, updateResponse => {
+            store.notes = updateResponse;
+            render();
+          });
+        });
+      } else {
+        api.create(noteObj, updateResponse => {
+          store.currentNote = updateResponse;
+
+          api.search(store.currentSearchTerm, updateResponse => {
+            store.notes = updateResponse;
+            render();
+          });
+        });
+      }
+
+    });
+  }
+
+  function handleNoteStartNewSubmit() {
+    $('.js-start-new-note-form').on('submit', event => {
+      event.preventDefault();
+      store.currentNote = false;
+      render();
+    });
+  }
+
+  function handleNoteDelete() {
+    $('.js-notes-list').on('click', '.removeBtn', event => {
+      event.preventDefault();
+      const id = getNoteIdFromElement(event.currentTarget);
+      api.delete(id, () => {
 
         api.search(store.currentSearchTerm, updateResponse => {
           store.notes = updateResponse;
-
+          if (id === store.currentNote.id) {
+            store.currentNote = false;
+          }
           render();
         });
-
       });
 
     });
@@ -94,6 +130,8 @@ const noteful = (function () {
     handleNoteItemClick();
     handleNoteSearchSubmit();
     handleNoteFormSubmit();
+    handleNoteStartNewSubmit();
+    handleNoteDelete();
   }
 
   // This object contains the only exposed methods from this module:

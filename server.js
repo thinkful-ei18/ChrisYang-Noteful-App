@@ -1,74 +1,26 @@
 'use strict';
 
 const express = require('express');
-const data = require('./db/notes');
-const simDB = require('./db/simDB');
-const notes = simDB.initialize(data);
+const morgan = require('morgan');
+
+const app = express();
+
+const notesRouter = require('./router/notes.router');
+
 const {PORT} = require('./config');
 // same as const PORT = require('./config').PORT;
-const {requestLogger} = require('./middleware/requestLogger');
+// const {requestLogger} = require('./middleware/requestLogger');
 
 // INSERT EXPRESS APP CODE HERE...
-const app = express();
-app.use(express.static('public'));
 app.use(express.json());
-app.use(requestLogger);
+app.use(morgan('dev'));
+app.use(express.static('public'));
+app.use('/v1', notesRouter);
 
-app.get('/v1/notes', (req, res, next) => {
-  const {searchTerm} = req.query;
 
-  notes.filter(searchTerm, (err, list) => {
-    if (err) {
-      return next(err);
-    }
-    res.json(list);
-  });
-});
-
-app.get('/v1/notes/:id', (req, res, next) => {
-  const id = parseInt(req.params.id, 10);
-  // const item = data.find(item => item.id === id);
-
-  notes.find(id, (err, item) => {
-    if (err) {
-      return next(err);
-    }
-    if (item) {
-      res.json(item);
-    } else {
-      return res.json({message: 'Not Found'});
-    }
-  });
-});
-
-app.put('/v1/notes/:id', (req, res, next) => {
-  const id = parseInt(req.params.id, 10);
-
-  /***** Never trust users - validate input *****/
-  const updateObj = {};
-  const updateFields = ['title', 'content'];
-
-  updateFields.forEach(field => {
-    if (field in req.body) {
-      updateObj[field] = req.body[field];
-    }
-  });
-
-  notes.update(id, updateObj, (err, item) => {
-    if (err) {
-      return next(err);
-    }
-    if (item) {
-      res.json(item);
-    } else {
-      next();
-    }
-  });
-});
-
-app.get('/throw', (req, res, next) => {
-  throw new Error('Boom!!');
-});
+// app.get('/throw', (req, res, next) => {
+//   throw new Error('Boom!!');
+// });
 
 app.use(function (req, res, next) {
   var err = new Error('Not found');
