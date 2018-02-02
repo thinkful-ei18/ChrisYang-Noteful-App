@@ -22,16 +22,13 @@ router.get('/notes/:id', (req, res, next) => {
   const id = parseInt(req.params.id, 10);
   // const item = data.find(item => item.id === id);
 
-  notes.find(id, (err, item) => {
-    if (err) {
-      return next(err);
-    }
+  notes.find(id).then((item) => {
     if (item) {
       res.json(item);
     } else {
-      return res.json({message: 'Not Found'});
+      next();
     }
-  });
+  }).catch(err => next(err));
 });
 
 router.put('/notes/:id', (req, res, next) => {
@@ -47,16 +44,13 @@ router.put('/notes/:id', (req, res, next) => {
     }
   });
 
-  notes.update(id, updateObj, (err, item) => {
-    if (err) {
-      return next(err);
-    }
+  notes.update(id, updateObj).then(item => {
     if (item) {
       res.json(item);
     } else {
       next();
     }
-  });
+  }).catch(err => next(err));
 });
 
 router.post('/notes', (req, res, next) => {
@@ -71,31 +65,25 @@ router.post('/notes', (req, res, next) => {
     return next(err);
   }
 
-  notes.create(newItem, (err, item) => {
-    if (err) {
-      return next(err);
-    }
+  notes.create(newItem).then(item => {
     if (item) {
       res.location(`http://${req.headers.host}/notes/${item.id}`).status(201).json(item);
     } else {
       next();
     }
-  });
+  }).catch(err => next(err));
 });
 
 router.delete('/notes/:id', (req, res, next) => {
   const id = req.params.id;
 
-  notes.delete(id, (err, result) => {
-    if (err) {
-      return next(err);
-    }
+  notes.delete(id).then(result => {
     if (result) {
       res.status(204).end();
     } else {
       next();
     }
-  });
+  }).catch(err => next(err));
 });
 
 module.exports = router;
