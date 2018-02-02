@@ -1,7 +1,2 @@
 language: node_js
 node_js: node
-deploy:
-  provider: heroku
-  app: chrisyang-noteful-app
-  on:
-    repo: thinkful-ei18/ChrisYang-Noteful-App
